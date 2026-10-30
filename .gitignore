@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local task tracking
+quaTrinhLam.txt
+[qQ]ua[tT]rinh[lL]am.txt
