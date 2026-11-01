@@ -1,0 +1,143 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { registerUser } from "../../services/authService";
+
+function RegisterPage() {
+
+    const navigate = useNavigate();
+
+    // Quản lý dữ liệu form
+    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    // Thông báo lỗi
+    const [error, setError] = useState("");
+
+    // Xử lý đăng ký
+    const handleRegister = (e: FormEvent<HTMLFormElement>) => {
+
+        e.preventDefault();
+
+        setError("");
+
+        // Kiểm tra dữ liệu
+        if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+            setError("Vui lòng nhập đầy đủ thông tin!");
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setError("Email không hợp lệ!");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("Mật khẩu phải có ít nhất 6 ký tự!");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError("Mật khẩu xác nhận không khớp!");
+            return;
+        }
+
+        // Gọi hàm đăng ký
+        const result = registerUser(
+            fullName.trim(),
+            email.trim().toLowerCase(),
+            password
+        );
+
+        if (!result.success) {
+            setError(result.message);
+            return;
+        }
+
+        // Chuyển sang trang đăng nhập
+        navigate("/login", {
+            state: { message: result.message, email }
+        });
+    };
+
+    return (
+
+        <div className="auth-card">
+
+            <h2>Tạo tài khoản</h2>
+
+            <p className="auth-description">
+                Đăng ký để bắt đầu trò chuyện cùng bạn bè.
+            </p>
+
+            <form onSubmit={handleRegister}>
+
+                <div className="form-group">
+                    <label>Họ và tên</label>
+
+                    <input
+                        type="text"
+                        placeholder="Nhập họ và tên"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Email</label>
+
+                    <input
+                        type="email"
+                        placeholder="example@gmail.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Mật khẩu</label>
+
+                    <input
+                        type="password"
+                        placeholder="Ít nhất 6 ký tự"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Xác nhận mật khẩu</label>
+
+                    <input
+                        type="password"
+                        placeholder="Nhập lại mật khẩu"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                </div>
+
+                {error && (
+                    <p className="error-message">{error}</p>
+                )}
+
+                <button type="submit" className="auth-button">
+                    Đăng ký
+                </button>
+
+            </form>
+
+            <p className="auth-footer">
+                Đã có tài khoản?
+                {" "}
+                <Link to="/login">Đăng nhập</Link>
+            </p>
+
+        </div>
+
+    );
+}
+
+export default RegisterPage;
