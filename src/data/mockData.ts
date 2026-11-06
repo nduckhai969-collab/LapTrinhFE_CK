@@ -9,3 +9,10 @@ export const mockConversations: Conversation[] = [];
 export const mockMessages: Message[] = [];
 export const mockContacts: Contact[] = [];
 export const mockNotifications: Notification[] = [];
+
+export const mockCurrentUser: User = {
+  id: 'user-01',
+  fullName: 'Nguyễn Văn A',
+  email: 'nguyenvana@vitechat.com',
+  status: 'online',
+};
