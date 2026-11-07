@@ -1,4 +1,4 @@
-import { Settings, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import viteLogo from '../../assets/vite.svg';
 import { mockCurrentUser } from '../../data/mockData';
 
@@ -32,10 +32,6 @@ const Header = () => {
             </span>
           </span>
         </div>
-
-        <button type="button" className="settings-button" title="Cài đặt">
-          <Settings size={20} />
-        </button>
       </div>
     </header>
   );
