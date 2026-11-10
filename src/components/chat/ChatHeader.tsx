@@ -5,8 +5,22 @@ export interface ChatHeaderProps {
   onOpenDetail?: () => void;
 }
 
-const ChatHeader = (_props: ChatHeaderProps) => {
-  return null;
+const ChatHeader = ({ conversation }: ChatHeaderProps) => {
+  if (conversation === undefined) {
+    return null;
+  }
+
+  let displayName = conversation.name;
+  if (displayName === undefined) {
+    displayName = 'Cuộc hội thoại';
+  }
+
+  return (
+    <header className="chat-header">
+      <span className="chat-avatar">{displayName.charAt(0)}</span>
+      <span className="chat-name">{displayName}</span>
+    </header>
+  );
 };
 
 export default ChatHeader;
