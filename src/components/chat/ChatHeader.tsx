@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react';
+import { Settings, Users } from 'lucide-react';
 import type { Conversation } from '../../types/conversation.types';
 
 export interface ChatHeaderProps {
@@ -6,7 +6,7 @@ export interface ChatHeaderProps {
   onOpenDetail?: () => void;
 }
 
-const ChatHeader = ({ conversation }: ChatHeaderProps) => {
+const ChatHeader = ({ conversation, onOpenDetail }: ChatHeaderProps) => {
   if (conversation === undefined) {
     return null;
   }
@@ -22,6 +22,12 @@ const ChatHeader = ({ conversation }: ChatHeaderProps) => {
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
 
+  const handleOpenDetail = () => {
+    if (onOpenDetail !== undefined) {
+      onOpenDetail();
+    }
+  };
+
   return (
     <header className="chat-header">
       <span className={avatarClassName}>{avatarText}</span>
@@ -34,6 +40,14 @@ const ChatHeader = ({ conversation }: ChatHeaderProps) => {
           </span>
         )}
       </div>
+      <button
+        type="button"
+        className="chat-settings-button"
+        onClick={handleOpenDetail}
+        title="Quản lý đoạn chat"
+      >
+        <Settings size={20} />
+      </button>
     </header>
   );
 };

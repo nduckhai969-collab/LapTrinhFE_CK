@@ -203,6 +203,7 @@
 .chat-title {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
 }
 
@@ -218,6 +219,24 @@
   gap: 4px;
   font-size: 12px;
   color: lightslategray;
+}
+
+.chat-settings-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: whitesmoke;
+  color: black;
+  cursor: pointer;
+}
+
+.chat-settings-button:hover {
+  background-color: #e5e5e5;
 }
 
 .chat-placeholder {
@@ -524,6 +543,10 @@
 }
 
 .modal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   height: 40px;
   padding: 0 20px;
   border: none;
@@ -540,4 +563,29 @@
 .modal-button-primary {
   background-color: blueviolet;
   color: white;
+}
+
+.modal-button-danger {
+  margin-right: auto;
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid lightgray;
+}
+
+.detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-name-row .form-input {
+  flex: 1;
+  min-width: 0;
 }

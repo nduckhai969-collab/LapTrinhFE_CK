@@ -7,6 +7,7 @@ import ChatHeader from '../../components/chat/ChatHeader';
 import MessageList from '../../components/chat/MessageList';
 import MessageInput from '../../components/chat/MessageInput';
 import CreateRoomModal from '../../components/chat/CreateRoomModal';
+import ChatDetailPanel from '../../components/chat/ChatDetailPanel';
 import { mockConversations, mockMessages, mockUsers, mockCurrentUser } from '../../data/mockData';
 import './chat.css';
 
@@ -20,6 +21,7 @@ const ChatPage = () => {
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   let selectedConversation: Conversation | null = null;
   for (let i = 0; i < conversations.length; i++) {
@@ -85,6 +87,27 @@ const ChatPage = () => {
     setSelectedConversationId(newConversation.id);
   };
 
+  const handleRenameConversation = (id: string, name: string) => {
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (conversation.id === id) {
+          return { ...conversation, name, updatedAt: new Date().toISOString() };
+        }
+        return conversation;
+      }),
+    );
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    setConversations((prevConversations) =>
+      prevConversations.filter((conversation) => conversation.id !== id),
+    );
+    if (selectedConversationId === id) {
+      setSelectedConversationId(null);
+    }
+    setIsDetailOpen(false);
+  };
+
   return (
     <div className="chat-page">
       <aside className="conversation-panel">
@@ -109,7 +132,10 @@ const ChatPage = () => {
       <section className="chat-area">
         {selectedConversation !== null ? (
           <>
-            <ChatHeader conversation={selectedConversation} />
+            <ChatHeader
+              conversation={selectedConversation}
+              onOpenDetail={() => setIsDetailOpen(true)}
+            />
             <MessageList
               messages={conversationMessages}
               currentUserId={mockCurrentUser.id}
@@ -127,6 +153,15 @@ const ChatPage = () => {
         users={mockUsers}
         onClose={() => setIsCreateRoomOpen(false)}
         onCreate={handleCreateRoom}
+      />
+
+      <ChatDetailPanel
+        key={selectedConversationId === null ? 'none' : selectedConversationId}
+        conversation={selectedConversation === null ? undefined : selectedConversation}
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        onRename={handleRenameConversation}
+        onDelete={handleDeleteConversation}
       />
     </div>
   );
