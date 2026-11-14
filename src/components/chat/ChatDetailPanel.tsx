@@ -110,6 +110,12 @@ const ChatDetailPanel = ({
                 <div key={user.id} className="member-item">
                   <span className="member-avatar">{user.fullName.charAt(0)}</span>
                   <span className="member-name">{user.fullName}</span>
+                  <span
+                    className={
+                      user.status === 'online' ? 'status-dot' : 'status-dot status-dot-offline'
+                    }
+                    title={user.status === 'online' ? 'Đang hoạt động' : 'Không hoạt động'}
+                  />
                 </div>
               ))}
             </div>

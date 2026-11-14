@@ -21,6 +21,8 @@ const ChatHeader = ({ conversation, onOpenDetail }: ChatHeaderProps) => {
   const avatarClassName = isRoom ? 'chat-avatar room-avatar' : 'chat-avatar';
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
+  const partner = conversation.participants[0];
+  const isPeerOnline = partner !== undefined && partner.status === 'online';
 
   const handleOpenDetail = () => {
     if (onOpenDetail !== undefined) {
@@ -37,6 +39,12 @@ const ChatHeader = ({ conversation, onOpenDetail }: ChatHeaderProps) => {
           <span className="chat-members">
             <Users size={12} />
             {memberCount} thành viên
+          </span>
+        )}
+        {!isRoom && (
+          <span className="chat-status">
+            <span className={isPeerOnline ? 'status-dot' : 'status-dot status-dot-offline'} />
+            {isPeerOnline ? 'Đang hoạt động' : 'Không hoạt động'}
           </span>
         )}
       </div>

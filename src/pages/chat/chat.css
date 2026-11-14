@@ -38,10 +38,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 15px;
+  border-radius: 50%;
   background-color: blueviolet;
   color: white;
   cursor: pointer;
@@ -131,7 +131,7 @@
 .chat-avatar {
   width: 40px;
   height: 40px;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .conversation-info {
@@ -153,19 +153,19 @@
 .conversation-name-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
 }
 
 .conversation-members {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
   flex-shrink: 0;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 10px;
   background-color: whitesmoke;
-  font-size: 11px;
+  font-size: 13px;
   color: lightslategray;
 }
 
@@ -208,7 +208,7 @@
 }
 
 .chat-name {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 500;
   color: black;
 }
@@ -216,8 +216,8 @@
 .chat-members {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 15px;
   color: lightslategray;
 }
 
@@ -254,8 +254,8 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 15px;
+  gap: 10px;
+  padding: 10px;
 }
 
 .message-empty {
@@ -588,4 +588,33 @@
 .detail-name-row .form-input {
   flex: 1;
   min-width: 0;
+}
+
+.conversation-avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.avatar-status-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: green;
+  border: 2px solid white;
+}
+
+.avatar-status-dot-offline {
+  background-color: gray;
+}
+
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: lightslategray;
 }
