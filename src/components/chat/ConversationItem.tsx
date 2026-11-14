@@ -1,3 +1,4 @@
+import { Users } from 'lucide-react';
 import type { Conversation } from '../../types/conversation.types';
 
 export interface ConversationItemProps {
@@ -8,16 +9,21 @@ export interface ConversationItemProps {
 
 const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItemProps) => {
   const itemClassName = isActive ? 'conversation-item active' : 'conversation-item';
+  const isRoom = conversation.type === 'group';
 
   let displayName = conversation.name;
   if (displayName === undefined) {
-    displayName = 'Cuộc hội thoại';
+    displayName = isRoom ? 'Phòng chat' : 'Cuộc hội thoại';
   }
 
   let lastMessageText = '';
   if (conversation.lastMessage !== undefined) {
     lastMessageText = conversation.lastMessage.content;
   }
+
+  const avatarClassName = isRoom ? 'conversation-avatar room-avatar' : 'conversation-avatar';
+  const avatarText = isRoom ? '#' : displayName.charAt(0);
+  const memberCount = conversation.participants.length;
 
   const onClickConversation = () => {
     if (onSelect !== undefined) {
@@ -27,9 +33,17 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
 
   return (
     <div className={itemClassName} onClick={onClickConversation}>
-      <span className="conversation-avatar">{displayName.charAt(0)}</span>
+      <span className={avatarClassName}>{avatarText}</span>
       <div className="conversation-info">
-        <span className="conversation-name">{displayName}</span>
+        <div className="conversation-name-row">
+          <span className="conversation-name">{displayName}</span>
+          {isRoom && (
+            <span className="conversation-members" title={`${memberCount} thành viên`}>
+              <Users size={12} />
+              {memberCount}
+            </span>
+          )}
+        </div>
         <span className="conversation-last-message">{lastMessageText}</span>
       </div>
     </div>

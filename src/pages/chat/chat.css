@@ -144,6 +144,34 @@
   font-size: 15px;
   font-weight: 500;
   color: black;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.conversation-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.conversation-members {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: whitesmoke;
+  font-size: 11px;
+  color: lightslategray;
+}
+
+.room-avatar {
+  border-radius: 10px;
+  background-color: #7c3aed;
 }
 
 .conversation-last-message {
@@ -172,10 +200,24 @@
   border-bottom: 1px solid lightgray;
 }
 
+.chat-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .chat-name {
   font-size: 15px;
   font-weight: 500;
   color: black;
+}
+
+.chat-members {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: lightslategray;
 }
 
 .chat-placeholder {

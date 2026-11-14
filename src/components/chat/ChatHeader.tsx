@@ -1,3 +1,4 @@
+import { Users } from 'lucide-react';
 import type { Conversation } from '../../types/conversation.types';
 
 export interface ChatHeaderProps {
@@ -10,15 +11,29 @@ const ChatHeader = ({ conversation }: ChatHeaderProps) => {
     return null;
   }
 
+  const isRoom = conversation.type === 'group';
+
   let displayName = conversation.name;
   if (displayName === undefined) {
-    displayName = 'Cuộc hội thoại';
+    displayName = isRoom ? 'Phòng chat' : 'Cuộc hội thoại';
   }
+
+  const avatarClassName = isRoom ? 'chat-avatar room-avatar' : 'chat-avatar';
+  const avatarText = isRoom ? '#' : displayName.charAt(0);
+  const memberCount = conversation.participants.length;
 
   return (
     <header className="chat-header">
-      <span className="chat-avatar">{displayName.charAt(0)}</span>
-      <span className="chat-name">{displayName}</span>
+      <span className={avatarClassName}>{avatarText}</span>
+      <div className="chat-title">
+        <span className="chat-name">{displayName}</span>
+        {isRoom && (
+          <span className="chat-members">
+            <Users size={12} />
+            {memberCount} thành viên
+          </span>
+        )}
+      </div>
     </header>
   );
 };
