@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import type { Conversation, Message } from '../../types';
+import { Plus } from 'lucide-react';
+import type { Conversation, CreateConversationPayload, Message, User } from '../../types';
 import SearchInput from '../../components/common/SearchInput';
 import ConversationList from '../../components/chat/ConversationList';
 import ChatHeader from '../../components/chat/ChatHeader';
 import MessageList from '../../components/chat/MessageList';
 import MessageInput from '../../components/chat/MessageInput';
+import CreateRoomModal from '../../components/chat/CreateRoomModal';
 import { mockConversations, mockMessages, mockUsers, mockCurrentUser } from '../../data/mockData';
 import './chat.css';
 
@@ -15,11 +17,13 @@ mockUsers.forEach((user) => {
 
 const ChatPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
 
   let selectedConversation: Conversation | null = null;
-  for (let i = 0; i < mockConversations.length; i++) {
-    const currentConversation = mockConversations[i];
+  for (let i = 0; i < conversations.length; i++) {
+    const currentConversation = conversations[i];
     if (currentConversation.id === selectedConversationId) {
       selectedConversation = currentConversation;
     }
@@ -50,12 +54,53 @@ const ChatPage = () => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
 
+  const handleCreateRoom = (payload: CreateConversationPayload) => {
+    const participants: User[] = [];
+    payload.participantIds.forEach((id) => {
+      const user = mockUsers.find((item) => item.id === id);
+      if (user !== undefined) {
+        participants.push(user);
+      }
+    });
+
+    let roomName = payload.name;
+    if (payload.type === 'direct' && participants.length > 0) {
+      roomName = participants[0].fullName;
+    }
+    if (roomName === undefined || roomName === '') {
+      roomName = 'Phòng mới';
+    }
+
+    const newConversation: Conversation = {
+      id: `conversation-${Date.now()}`,
+      type: payload.type,
+      name: roomName,
+      participants,
+      unreadCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setConversations((prevConversations) => [newConversation, ...prevConversations]);
+    setSelectedConversationId(newConversation.id);
+  };
+
   return (
     <div className="chat-page">
       <aside className="conversation-panel">
-        <SearchInput className="conversation-search" placeholder="Tìm kiếm cuộc trò chuyện" />
+        <div className="conversation-toolbar">
+          <SearchInput className="conversation-search" placeholder="Tìm kiếm cuộc trò chuyện" />
+          <button
+            type="button"
+            className="create-room-button"
+            onClick={() => setIsCreateRoomOpen(true)}
+            title="Tạo phòng chat"
+          >
+            <Plus size={24} />
+          </button>
+        </div>
         <ConversationList
-          conversations={mockConversations}
+          conversations={conversations}
           activeId={activeConversationId}
           onSelectConversation={setSelectedConversationId}
         />
@@ -76,6 +121,13 @@ const ChatPage = () => {
           <div className="chat-placeholder">Chọn một cuộc hội thoại để bắt đầu</div>
         )}
       </section>
+
+      <CreateRoomModal
+        isOpen={isCreateRoomOpen}
+        users={mockUsers}
+        onClose={() => setIsCreateRoomOpen(false)}
+        onCreate={handleCreateRoom}
+      />
     </div>
   );
 };
