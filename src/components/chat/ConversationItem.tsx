@@ -24,6 +24,8 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
   const avatarClassName = isRoom ? 'conversation-avatar room-avatar' : 'conversation-avatar';
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
+  const partner = conversation.participants[0];
+  const isOnline = !isRoom && partner !== undefined && partner.status === 'online';
 
   const onClickConversation = () => {
     if (onSelect !== undefined) {
@@ -33,7 +35,17 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
 
   return (
     <div className={itemClassName} onClick={onClickConversation}>
-      <span className={avatarClassName}>{avatarText}</span>
+      <span className="conversation-avatar-wrapper">
+        <span className={avatarClassName}>{avatarText}</span>
+        {!isRoom && (
+          <span
+            className={
+              isOnline ? 'avatar-status-dot' : 'avatar-status-dot avatar-status-dot-offline'
+            }
+            title={isOnline ? 'Đang hoạt động' : 'Không hoạt động'}
+          />
+        )}
+      </span>
       <div className="conversation-info">
         <div className="conversation-name-row">
           <span className="conversation-name">{displayName}</span>
