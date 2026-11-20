@@ -15,6 +15,16 @@ export interface User {
 
 export type UserSummary = Pick<User, 'id' | 'fullName' | 'avatar' | 'status'>;
 
+export interface AuthAccount {
+  id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  avatar?: string;
+  status: UserStatus;
+  createdAt?: string;
+}
+
 export interface UpdateUserProfilePayload {
   fullName?: string;
   avatar?: string;
