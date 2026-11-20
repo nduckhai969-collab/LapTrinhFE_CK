@@ -27,7 +27,6 @@ export const registerUser = (
         };
     }
 
-    // Tạo tài khoản mới
     const newUser: AuthAccount = {
         id: crypto.randomUUID(),
         fullName: fullName,
@@ -76,7 +75,6 @@ export const loginUser = (
         createdAt: account.createdAt
     };
 
-    // Lưu người dùng hiện tại
     localStorage.setItem(
         current_user_key,
         JSON.stringify(currentUser)
