@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import type { Conversation, CreateConversationPayload, Message, User } from '../../types';
 import SearchInput from '../../components/common/SearchInput';
@@ -8,20 +8,74 @@ import MessageList from '../../components/chat/MessageList';
 import MessageInput from '../../components/chat/MessageInput';
 import CreateRoomModal from '../../components/chat/CreateRoomModal';
 import ChatDetailPanel from '../../components/chat/ChatDetailPanel';
-import { mockConversations, mockMessages, mockUsers, mockCurrentUser } from '../../data/mockData';
+import { mockUsers, mockCurrentUser } from '../../data/mockData';
+import { getAuthSession, getUserList } from '../../services/authSevices';
 import './chat.css';
 
-const senderNames: Record<string, string> = { [mockCurrentUser.id]: mockCurrentUser.fullName };
-mockUsers.forEach((user) => {
-  senderNames[user.id] = user.fullName;
-});
-
 const ChatPage = () => {
+  const session = getAuthSession();
+  const currentUserId = session?.username ?? mockCurrentUser.id;
+  const senderNames: Record<string, string> = {
+    [currentUserId]: session?.username ?? mockCurrentUser.fullName,
+  };
+  mockUsers.forEach((user) => {
+    senderNames[user.id] = user.fullName;
+  });
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(true);
+  const [conversationError, setConversationError] = useState('');
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    getUserList()
+      .then((entries) => {
+        if (!isCurrent) {
+          return;
+        }
+
+        const serverConversations: Conversation[] = entries.map((entry) => {
+          const isGroup = entry.type === 1;
+          const participant: User = {
+            id: entry.name,
+            fullName: entry.name,
+            email: '',
+            status: 'offline',
+          };
+
+          return {
+            id: `${entry.type}:${entry.name}`,
+            type: isGroup ? 'group' : 'direct',
+            name: entry.name,
+            participants: isGroup ? [] : [participant],
+            unreadCount: 0,
+            updatedAt: entry.actionTime,
+          };
+        });
+
+        setConversations(serverConversations);
+      })
+      .catch((error: unknown) => {
+        if (isCurrent) {
+          setConversationError(
+            error instanceof Error ? error.message : 'Không tải được danh sách hội thoại.',
+          );
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoadingConversations(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   let selectedConversation: Conversation | null = null;
   for (let i = 0; i < conversations.length; i++) {
@@ -47,7 +101,7 @@ const ChatPage = () => {
     const newMessage: Message = {
       id: `message-${Date.now()}`,
       conversationId: selectedConversationId,
-      senderId: mockCurrentUser.id,
+      senderId: currentUserId,
       content,
       type: 'text',
       status: 'sent',
@@ -122,11 +176,16 @@ const ChatPage = () => {
             <Plus size={24} />
           </button>
         </div>
-        <ConversationList
-          conversations={conversations}
-          activeId={activeConversationId}
-          onSelectConversation={setSelectedConversationId}
-        />
+        {conversationError && <p className="error-message">{conversationError}</p>}
+        {isLoadingConversations ? (
+          <div className="conversation-empty">Đang tải hội thoại...</div>
+        ) : (
+          <ConversationList
+            conversations={conversations}
+            activeId={activeConversationId}
+            onSelectConversation={setSelectedConversationId}
+          />
+        )}
       </aside>
 
       <section className="chat-area">
@@ -138,7 +197,7 @@ const ChatPage = () => {
             />
             <MessageList
               messages={conversationMessages}
-              currentUserId={mockCurrentUser.id}
+              currentUserId={currentUserId}
               senderNames={senderNames}
             />
             <MessageInput onSendMessage={handleSendMessage} />
