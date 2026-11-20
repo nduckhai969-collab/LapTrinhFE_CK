@@ -1,6 +1,7 @@
 import { User } from 'lucide-react';
 import viteLogo from '../../assets/vite.svg';
 import { mockCurrentUser } from '../../data/mockData';
+import { getAuthSession } from '../../services/authSevices';
 
 export interface HeaderProps {
   title?: string;
@@ -8,7 +9,9 @@ export interface HeaderProps {
 }
 
 const Header = () => {
-  const isUserOnline = mockCurrentUser.status === 'online';
+  const session = getAuthSession();
+  const displayName = session?.username ?? mockCurrentUser.fullName;
+  const isUserOnline = session !== null || mockCurrentUser.status === 'online';
   const statusText = isUserOnline ? 'Đang hoạt động' : 'Không hoạt động';
   const statusDotClass = isUserOnline ? 'status-dot' : 'status-dot status-dot-offline';
 
@@ -25,7 +28,7 @@ const Header = () => {
             <User size={20} />
           </span>
           <span className="user-info">
-            <span className="username">{mockCurrentUser.fullName}</span>
+            <span className="username">{displayName}</span>
             <span className="status">
               <span className={statusDotClass}></span>
               {statusText}
