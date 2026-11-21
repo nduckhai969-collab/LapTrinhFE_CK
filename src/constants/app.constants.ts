@@ -6,5 +6,10 @@ export const APP_CONFIG = {
 
 export const PAGINATION = {
   DEFAULT_PAGE_SIZE: 20,
-  MESSAGES_PER_PAGE: 30,
+  MESSAGES_PER_PAGE: 50,
 } as const;
+
+export const ROOM_TYPE = 1;
+export const PEOPLE_TYPE = 0;
+export const SEND_CHAT_TYPE_ROOM = 'room';
+export const SEND_CHAT_TYPE_PEOPLE = 'people';

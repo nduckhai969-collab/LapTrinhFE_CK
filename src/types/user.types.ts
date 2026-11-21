@@ -32,3 +32,11 @@ export interface UpdateUserProfilePayload {
   bio?: string;
   status?: UserStatus;
 }
+
+export interface CheckUserOnlinePayload {
+  user: string;
+}
+
+export interface CheckUserOnlineResult {
+  status: boolean;
+}
