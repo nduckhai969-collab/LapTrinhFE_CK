@@ -7,16 +7,38 @@ export interface SearchInputProps {
   onSearch?: (query: string) => void;
   className?: string;
 }
+const SearchInput = ({
+                       value = '',
+                       placeholder = 'Tìm kiếm...',
+                       onChange,
+                       onSearch,
+                       className = '',
+                     }: SearchInputProps) => {
+  const wrapperClass = className
+      ? `search-box ${className}`
+      : 'search-box';
 
-const SearchInput = ({ placeholder = 'Tìm kiếm...', className }: SearchInputProps) => {
-  const wrapperClass = className ? `search-box ${className}` : 'search-box';
+  const handleKeyDown = (
+      event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === 'Enter') {
+      onSearch?.(value);
+    }
+  };
 
   return (
-    <div className={wrapperClass}>
-      <Search size={18} className="search-icon" />
-      <input type="text" className="search-field" placeholder={placeholder} />
-    </div>
+      <div className={wrapperClass}>
+        <Search size={18} className="search-icon" />
+
+        <input
+            type="text"
+            className="search-field"
+            value={value}
+            placeholder={placeholder}
+            onChange={(event) => onChange?.(event.target.value)}
+            onKeyDown={handleKeyDown}
+        />
+      </div>
   );
 };
-
 export default SearchInput;

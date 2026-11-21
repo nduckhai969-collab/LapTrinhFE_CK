@@ -32,3 +32,22 @@ export interface UpdateConversationPayload {
   isPinned?: boolean;
   isMuted?: boolean;
 }
+export interface CreateRoomPayload{
+  name: string;
+}
+export interface CreateRoomResponse{
+  name: string;
+  user: Array<{
+    id:number;
+  }>;
+}
+export interface JoinRoomPayload{
+  name: string;
+}
+export interface RoomMember{
+  id: number;
+}
+export interface JoinRoomResponse{
+  name: string;
+  user:RoomMember[];
+}

@@ -8,6 +8,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { ROUTE_PATHS } from '../../routes/routePaths';
+import { logoutUser } from '../../services/authSevices';
 
 export interface NavigationProps {
   currentPath?: string;
@@ -104,6 +105,9 @@ const Navigation = ({
         <NavLink
           to={ROUTE_PATHS.LOGIN}
           className="nav-item nav-item-logout"
+          onClick={() => {
+            void logoutUser();
+          }}
           title="Đăng xuất"
           aria-label="Đăng xuất"
         >
