@@ -1,4 +1,11 @@
-const SOCKET_URL = 'wss://chat.longapp.io.vn/chat/chat';
+import { SOCKET_EVENTS } from '../constants/socket.constants';
+import {
+  closeSocket,
+  isSocketOpen,
+  onSocketClose,
+  sendSocket,
+} from './websocket.service';
+
 const SESSION_KEY = 'connectchat_session';
 
 export interface AuthSession {
@@ -12,24 +19,11 @@ export interface ChatListEntry {
   actionTime: string;
 }
 
-interface SocketResponse<T = unknown> {
-  status: 'success' | 'error';
-  event: string;
-  data?: T;
-  mes?: string;
-}
-
-interface PendingRequest {
-  promise: Promise<unknown>;
-  resolve: (value: unknown) => void;
-  reject: (reason: Error) => void;
-  timeoutId: number;
-}
-
-let socket: WebSocket | null = null;
-let connectionPromise: Promise<void> | null = null;
 let isAuthenticated = false;
-const pendingRequests = new Map<string, PendingRequest>();
+
+onSocketClose(() => {
+  isAuthenticated = false;
+});
 
 const readSession = (): AuthSession | null => {
   const value = localStorage.getItem(SESSION_KEY);
@@ -49,120 +43,16 @@ const saveSession = (session: AuthSession): void => {
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 };
 
-const connect = async (): Promise<void> => {
-  if (socket?.readyState === WebSocket.OPEN) {
-    return;
-  }
-  if (connectionPromise !== null) {
-    return connectionPromise;
-  }
-
-  const nextSocket = new WebSocket(SOCKET_URL);
-  socket = nextSocket;
-  connectionPromise = new Promise<void>((resolve, reject) => {
-    nextSocket.onopen = () => resolve();
-    nextSocket.onerror = () => reject(new Error('Không thể kết nối máy chủ chat.'));
-    nextSocket.onclose = () => {
-      if (socket === nextSocket) {
-        socket = null;
-        isAuthenticated = false;
-      }
-      pendingRequests.forEach((request) => {
-        window.clearTimeout(request.timeoutId);
-        request.reject(new Error('Kết nối tới máy chủ chat đã bị đóng.'));
-      });
-      pendingRequests.clear();
-    };
-    nextSocket.onmessage = (message) => {
-      let response: SocketResponse;
-      try {
-        response = JSON.parse(String(message.data)) as SocketResponse;
-      } catch {
-        return;
-      }
-
-      const request = pendingRequests.get(response.event);
-      if (request === undefined) {
-        return;
-      }
-      window.clearTimeout(request.timeoutId);
-      pendingRequests.delete(response.event);
-      if (response.status === 'success') {
-        request.resolve(response.data);
-      } else {
-        request.reject(new Error(response.mes ?? `Yêu cầu ${response.event} thất bại.`));
-      }
-    };
-  });
-
-  const activeConnection = connectionPromise;
-  try {
-    await activeConnection;
-  } finally {
-    if (connectionPromise === activeConnection) {
-      connectionPromise = null;
-    }
-  }
-};
-
-const sendRequest = async <T>(
-  event: string,
-  data?: Record<string, unknown>,
-): Promise<T> => {
-  await connect();
-  if (socket === null || socket.readyState !== WebSocket.OPEN) {
-    throw new Error('Kết nối tới máy chủ chat chưa sẵn sàng.');
-  }
-  const existingRequest = pendingRequests.get(event);
-  if (existingRequest !== undefined) {
-    if (event === 'GET_USER_LIST' || event === 'RE_LOGIN') {
-      return existingRequest.promise as Promise<T>;
-    }
-    throw new Error(`Yêu cầu ${event} đang được xử lý.`);
-  }
-
-  const payload = data === undefined
-    ? { action: 'onchat', data: { event } }
-    : { action: 'onchat', data: { event, data } };
-
-  let resolveRequest!: (value: T) => void;
-  let rejectRequest!: (reason: Error) => void;
-  const requestPromise = new Promise<T>((resolve, reject) => {
-    resolveRequest = resolve;
-    rejectRequest = reject;
-  });
-  const timeoutId = window.setTimeout(() => {
-    if (pendingRequests.get(event)?.promise === requestPromise) {
-      pendingRequests.delete(event);
-    }
-    rejectRequest(new Error(`Máy chủ không phản hồi yêu cầu ${event}.`));
-  }, 15000);
-
-  pendingRequests.set(event, {
-    promise: requestPromise,
-    resolve: (value) => resolveRequest(value as T),
-    reject: rejectRequest,
-    timeoutId,
-  });
-
-  try {
-    socket.send(JSON.stringify(payload));
-  } catch {
-    window.clearTimeout(timeoutId);
-    pendingRequests.delete(event);
-    rejectRequest(new Error('Không gửi được yêu cầu tới máy chủ chat.'));
-  }
-
-  return requestPromise;
-};
-
 export const getAuthSession = (): AuthSession | null => readSession();
 
 export const registerUser = async (
   username: string,
   password: string,
 ): Promise<{ success: boolean; message: string }> => {
-  const message = await sendRequest<string>('REGISTER', { user: username, pass: password });
+  const message = await sendSocket<string>(SOCKET_EVENTS.REGISTER, {
+    user: username,
+    pass: password,
+  });
   return { success: true, message: message ?? 'Đăng ký thành công.' };
 };
 
@@ -170,7 +60,7 @@ export const loginUser = async (
   username: string,
   password: string,
 ): Promise<{ success: boolean; message: string }> => {
-  const response = await sendRequest<{ RE_LOGIN_CODE?: string }>('LOGIN', {
+  const response = await sendSocket<{ RE_LOGIN_CODE?: string }>(SOCKET_EVENTS.LOGIN, {
     user: username,
     pass: password,
   });
@@ -184,7 +74,7 @@ export const loginUser = async (
 };
 
 const ensureAuthenticated = async (): Promise<void> => {
-  if (isAuthenticated && socket?.readyState === WebSocket.OPEN) {
+  if (isAuthenticated && isSocketOpen()) {
     return;
   }
 
@@ -193,7 +83,7 @@ const ensureAuthenticated = async (): Promise<void> => {
     throw new Error('Phiên đăng nhập không tồn tại. Vui lòng đăng nhập lại.');
   }
 
-  const response = await sendRequest<{ RE_LOGIN_CODE?: string }>('RE_LOGIN', {
+  const response = await sendSocket<{ RE_LOGIN_CODE?: string }>(SOCKET_EVENTS.RE_LOGIN, {
     user: session.username,
     code: session.reloginCode,
   });
@@ -208,7 +98,7 @@ const ensureAuthenticated = async (): Promise<void> => {
 
 export const getUserList = async (): Promise<ChatListEntry[]> => {
   await ensureAuthenticated();
-  const entries = await sendRequest<ChatListEntry[]>('GET_USER_LIST', {});
+  const entries = await sendSocket<ChatListEntry[]>(SOCKET_EVENTS.GET_USER_LIST, {});
   return Array.isArray(entries) ? entries : [];
 };
 
@@ -216,12 +106,11 @@ export const logoutUser = async (): Promise<void> => {
   try {
     if (isAuthenticated || readSession() !== null) {
       await ensureAuthenticated();
-      await sendRequest<string>('LOGOUT');
+      await sendSocket<string>(SOCKET_EVENTS.LOGOUT);
     }
   } finally {
     localStorage.removeItem(SESSION_KEY);
     isAuthenticated = false;
-    socket?.close();
-    socket = null;
+    closeSocket();
   }
 };
