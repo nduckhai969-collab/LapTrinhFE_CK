@@ -1,5 +1,4 @@
 import { Search } from 'lucide-react';
-
 export interface SearchInputProps {
   value?: string;
   placeholder?: string;

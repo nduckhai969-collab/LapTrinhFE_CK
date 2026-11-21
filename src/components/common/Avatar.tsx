@@ -7,7 +7,6 @@ export interface AvatarProps {
   status?: UserStatus;
   className?: string;
 }
-
 const Avatar = ({
                   src,
                   name,
@@ -31,5 +30,4 @@ const Avatar = ({
       </div>
   );
 };
-
 export default Avatar;

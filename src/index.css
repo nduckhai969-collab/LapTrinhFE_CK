@@ -393,38 +393,32 @@ body,
   border: 1px solid #a7f3d0;
   border-radius: 8px;
 }
-
 .auth-footer {
   margin-top: 20px;
   text-align: center;
   font-size: 14px;
   color: #6b7280;
 }
-
 .auth-footer a {
   font-weight: 600;
   color: blueviolet;
   text-decoration: none;
 }
-
 .auth-footer a:hover {
   text-decoration: underline;
 }
-
 .contacts-page {
   width: 100%;
   min-height: 100%;
   padding: 24px;
   color: #1f2937;
 }
-
 .contacts-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
 }
-
 .contacts-header h1 {
   margin: 0 0 6px;
   font-size: 26px;
@@ -435,7 +429,6 @@ body,
   color: #6b7280;
   font-size: 14px;
 }
-
 .contacts-count {
   padding: 8px 14px;
   background: #eff6ff;
@@ -443,7 +436,6 @@ body,
   border-radius: 20px;
   font-size: 13px;
 }
-
 .contacts-toolbar {
  width: 100%;
   min-width: 100%;
@@ -456,12 +448,10 @@ body,
   border-radius: 12px;
   overflow: hidden;
 }
-
 .contact-list {
   display: flex;
   flex-direction: column;
 }
-
 .contact-item {
   display: flex;
   align-items: center;
@@ -471,36 +461,29 @@ body,
   cursor: pointer;
   transition: background 0.2s;
 }
-
 .contact-item:last-child {
   border-bottom: none;
 }
-
 .contact-item:hover {
   background: #f9fafb;
 }
-
 .contact-info {
   flex: 1;
   min-width: 0;
 }
-
 .contact-info h3 {
   margin: 0 0 5px;
   font-size: 15px;
 }
-
 .contact-info p {
   margin: 0;
   color: #6b7280;
   font-size: 13px;
 }
-
 .contact-status {
   font-size: 12px;
   color: #6b7280;
 }
-
 .contact-status-online {
   color: #16a34a;
 }
@@ -522,25 +505,21 @@ body,
   font-weight: 600;
   overflow: visible;
 }
-
 .avatar-small {
   width: 32px;
   height: 32px;
   font-size: 12px;
 }
-
 .avatar-medium {
   width: 44px;
   height: 44px;
   font-size: 16px;
 }
-
 .avatar-large {
   width: 60px;
   height: 60px;
   font-size: 20px;
 }
-
 .avatar-image {
   width: 100%;
   height: 100%;
@@ -557,19 +536,15 @@ body,
   border: 2px solid white;
   border-radius: 50%;
 }
-
 .avatar-status-online {
   background: #22c55e;
 }
-
 .avatar-status-offline {
   background: #9ca3af;
 }
-
 .avatar-status-away {
   background: #f59e0b;
 }
-
 .avatar-status-busy {
   background: #ef4444;
 }
