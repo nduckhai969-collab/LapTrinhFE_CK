@@ -10,10 +10,18 @@ import CreateRoomModal from '../../components/chat/CreateRoomModal';
 import ChatDetailPanel from '../../components/chat/ChatDetailPanel';
 import { mockUsers, mockCurrentUser } from '../../data/mockData';
 import { getAuthSession, getUserList } from '../../services/authSevices';
+import { checkUserOnline } from '../../services/user.service';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import {
+  setOnlineError,
+  setOnlineLoading,
+  setUserOnlineStatus,
+} from '../../store/presence/presenceActions';
 import './chat.css';
 
 const ChatPage = () => {
   const session = getAuthSession();
+  const dispatch = useAppDispatch();
   const currentUserId = session?.username ?? mockCurrentUser.id;
   const senderNames: Record<string, string> = {
     [currentUserId]: session?.username ?? mockCurrentUser.fullName,
@@ -58,6 +66,37 @@ const ChatPage = () => {
         });
 
         setConversations(serverConversations);
+
+        const directNames = entries
+          .filter((entry) => entry.type === 0)
+          .map((entry) => entry.name);
+        if (directNames.length > 0) {
+          dispatch(setOnlineLoading(true));
+          Promise.all(
+            directNames.map(async (name) => {
+              const isOnline = await checkUserOnline(name);
+              if (isCurrent) {
+                dispatch(setUserOnlineStatus(name, isOnline));
+              }
+            }),
+          )
+            .catch((error: unknown) => {
+              if (isCurrent) {
+                dispatch(
+                  setOnlineError(
+                    error instanceof Error
+                      ? error.message
+                      : 'Không kiểm tra được trạng thái hoạt động.',
+                  ),
+                );
+              }
+            })
+            .finally(() => {
+              if (isCurrent) {
+                dispatch(setOnlineLoading(false));
+              }
+            });
+        }
       })
       .catch((error: unknown) => {
         if (isCurrent) {
@@ -75,7 +114,7 @@ const ChatPage = () => {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [dispatch]);
 
   let selectedConversation: Conversation | null = null;
   for (let i = 0; i < conversations.length; i++) {
