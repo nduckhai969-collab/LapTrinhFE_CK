@@ -1,4 +1,8 @@
-import { ACTION, SOCKET_EVENTS } from '../constants/socket.constants';
+import {
+  ACTION,
+  SOCKET_EVENTS,
+  SOCKET_RESPONSE_EVENT_ALIASES,
+} from '../constants/socket.constants';
 import type { SocketEvent } from '../constants/socket.constants';
 import type { SocketEnvelope, SocketResponse } from '../types/socket.types';
 
@@ -55,12 +59,25 @@ export const connectSocket = async (): Promise<void> => {
 
       messageListeners.forEach((listener) => listener(response));
 
-      const request = pendingRequests.get(response.event);
+      let requestEvent = response.event;
+      let request = pendingRequests.get(requestEvent);
+
+      if (request === undefined) {
+        const matchingAlias = Object.entries(SOCKET_RESPONSE_EVENT_ALIASES).find(
+          ([, responseEvent]) => responseEvent === response.event,
+        );
+
+        if (matchingAlias !== undefined) {
+          requestEvent = matchingAlias[0];
+          request = pendingRequests.get(requestEvent);
+        }
+      }
+
       if (request === undefined) {
         return;
       }
       window.clearTimeout(request.timeoutId);
-      pendingRequests.delete(response.event);
+      pendingRequests.delete(requestEvent);
       if (response.status === 'success') {
         request.resolve(response.data);
       } else {
