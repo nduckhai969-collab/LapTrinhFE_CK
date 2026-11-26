@@ -1,42 +1,61 @@
+import { Trash2 } from 'lucide-react';
 import type { Contact } from '../../types/contact.types';
+import type { UserStatus } from '../../types/user.types';
 import Avatar from '../common/Avatar';
+
 export interface ContactItemProps {
   contact: Contact;
-  onSelect?: (id: string) => void;
+  isOnline?: boolean | null;
+  onRemove?: (id: string) => void;
 }
-const ContactItem = ({ contact, onSelect }: ContactItemProps) => {
-  const user = contact.user;
 
-  if (!user) {
-    return null;
+const ContactItem = ({ contact, isOnline, onRemove }: ContactItemProps) => {
+  const username = contact.contactUserId;
+  const displayName = contact.nickname?.trim() || contact.user?.fullName || username;
+  const avatarStatus: UserStatus | undefined = isOnline === undefined || isOnline === null
+    ? undefined
+    : isOnline ? 'online' : 'offline';
+
+  let statusText = 'Chưa kiểm tra';
+  let statusClass = 'unknown';
+  if (isOnline === true) {
+    statusText = 'Đang hoạt động';
+    statusClass = 'online';
+  } else if (isOnline === false) {
+    statusText = 'Ngoại tuyến';
+    statusClass = 'offline';
   }
+
   return (
-      <div
-          className="contact-item"
-          onClick={() => onSelect?.(contact.id)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              onSelect?.(contact.id);
-            }
-          }}
-      >
-        <Avatar
-            src={user.avatar}
-            name={user.fullName}
-            status={user.status}
-        />
+    <article className="contact-item">
+      <Avatar
+        src={contact.user?.avatar}
+        name={displayName}
+        status={avatarStatus}
+        className="contact-avatar"
+      />
 
-        <div className="contact-info">
-          <h3>{contact.nickname || user.fullName}</h3>
-          <p>{user.email}</p>
-        </div>
-
-        <span className={`contact-status contact-status-${user.status}`}>
-        {user.status === 'online' ? 'Đang hoạt động' : 'Ngoại tuyến'}
-      </span>
+      <div className="contact-info">
+        <h3>{displayName}</h3>
+        <p className="contact-username">@{username}</p>
       </div>
+
+      <span className={`contact-status contact-status-${statusClass}`}>
+        <span className="contact-status-dot" />
+        {statusText}
+      </span>
+
+      <button
+        type="button"
+        className="contact-remove-button"
+        onClick={() => onRemove?.(contact.id)}
+        aria-label={`Xóa ${displayName} khỏi danh bạ`}
+        title="Xóa liên hệ"
+      >
+        <Trash2 size={17} />
+      </button>
+    </article>
   );
 };
+
 export default ContactItem;

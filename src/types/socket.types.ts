@@ -10,7 +10,7 @@ export interface SocketEnvelope<TData = unknown> {
 
 export interface SocketResponse<TData = unknown> {
   status: SocketStatus;
-  event: SocketEvent;
+  event: string;
   data?: TData;
   mes?: string;
 }
