@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import type { Conversation, CreateConversationPayload, Message, User } from '../../types';
 import SearchInput from '../../components/common/SearchInput';
@@ -15,6 +16,10 @@ import { useOnlineStatusPolling } from '../../hooks/useOnlineStatusPolling';
 import './chat.css';
 
 const ChatPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navigationState = location.state as { openContact?: string } | null;
+  const requestedContact = navigationState?.openContact?.trim() ?? '';
   const session = getAuthSession();
   const currentUserId = session?.username ?? mockCurrentUser.id;
   const senderNames: Record<string, string> = {

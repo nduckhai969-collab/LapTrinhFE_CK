@@ -73,7 +73,7 @@ export const loginUser = async (
   return { success: true, message: 'Đăng nhập thành công.' };
 };
 
-const ensureAuthenticated = async (): Promise<void> => {
+export const ensureAuthenticated = async (): Promise<void> => {
   if (isAuthenticated && isSocketOpen()) {
     return;
   }
