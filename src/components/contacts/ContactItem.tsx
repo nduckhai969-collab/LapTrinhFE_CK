@@ -6,10 +6,11 @@ import Avatar from '../common/Avatar';
 export interface ContactItemProps {
   contact: Contact;
   isOnline?: boolean | null;
+  onOpenChat?: (username: string) => void;
   onRemove?: (id: string) => void;
 }
 
-const ContactItem = ({ contact, isOnline, onRemove }: ContactItemProps) => {
+const ContactItem = ({ contact, isOnline, onOpenChat, onRemove }: ContactItemProps) => {
   const username = contact.contactUserId;
   const displayName = contact.nickname?.trim() || contact.user?.fullName || username;
   const avatarStatus: UserStatus | undefined = isOnline === undefined || isOnline === null
@@ -28,22 +29,29 @@ const ContactItem = ({ contact, isOnline, onRemove }: ContactItemProps) => {
 
   return (
     <article className="contact-item">
-      <Avatar
-        src={contact.user?.avatar}
-        name={displayName}
-        status={avatarStatus}
-        className="contact-avatar"
-      />
+      <button
+        type="button"
+        className="contact-open-button"
+        onClick={() => onOpenChat?.(username)}
+        aria-label={`Mở cuộc trò chuyện với ${displayName}`}
+      >
+        <Avatar
+          src={contact.user?.avatar}
+          name={displayName}
+          status={avatarStatus}
+          className="contact-avatar"
+        />
 
-      <div className="contact-info">
-        <h3>{displayName}</h3>
-        <p className="contact-username">@{username}</p>
-      </div>
+        <div className="contact-info">
+          <h3>{displayName}</h3>
+          <p className="contact-username">@{username}</p>
+        </div>
 
-      <span className={`contact-status contact-status-${statusClass}`}>
-        <span className="contact-status-dot" />
-        {statusText}
-      </span>
+        <span className={`contact-status contact-status-${statusClass}`}>
+          <span className="contact-status-dot" />
+          {statusText}
+        </span>
+      </button>
 
       <button
         type="button"

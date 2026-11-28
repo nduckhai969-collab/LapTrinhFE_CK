@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { UserRoundPlus, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ContactList from '../../components/contacts/ContactList';
 import SearchInput from '../../components/common/SearchInput';
 import type { Contact } from '../../types/contact.types';
 import { checkUserExists, checkUserOnline } from '../../services/contactService';
 import { getAuthSession } from '../../services/authSevices';
+import { ROUTE_PATHS } from '../../routes/routePaths';
 
 const STORAGE_PREFIX = 'connectchat_contacts:';
 
@@ -41,6 +43,7 @@ const readContacts = (storageKey: string | null): Contact[] => {
 };
 
 const ContactsPage = () => {
+  const navigate = useNavigate();
   const session = getAuthSession();
   const storageKey = session === null
     ? null
@@ -212,6 +215,10 @@ const ContactsPage = () => {
     }
   };
 
+  const handleOpenContact = (username: string) => {
+    navigate(ROUTE_PATHS.CHAT, { state: { openContact: username } });
+  };
+
   return (
     <main className="contacts-page">
       <header className="contacts-header">
@@ -320,6 +327,7 @@ const ContactsPage = () => {
             emptyMessage={contacts.length > 0
               ? 'Không có liên hệ nào khớp với nội dung tìm kiếm.'
               : undefined}
+            onOpenContact={handleOpenContact}
             onRemoveContact={handleRemoveContact}
           />
         </div>

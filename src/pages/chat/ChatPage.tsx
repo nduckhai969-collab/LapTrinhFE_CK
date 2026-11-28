@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import type { Conversation, CreateConversationPayload, Message, User } from '../../types';
 import SearchInput from '../../components/common/SearchInput';
@@ -13,6 +14,10 @@ import { getAuthSession, getUserList } from '../../services/authSevices';
 import './chat.css';
 
 const ChatPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navigationState = location.state as { openContact?: string } | null;
+  const requestedContact = navigationState?.openContact?.trim() ?? '';
   const session = getAuthSession();
   const currentUserId = session?.username ?? mockCurrentUser.id;
   const senderNames: Record<string, string> = {
@@ -76,6 +81,49 @@ const ChatPage = () => {
       isCurrent = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (requestedContact === '' || isLoadingConversations) {
+      return;
+    }
+
+    const normalizedUsername = requestedContact.toLowerCase();
+    const existingConversation = conversations.find((conversation) =>
+      conversation.type === 'direct'
+      && (
+        conversation.name?.toLowerCase() === normalizedUsername
+        || conversation.participants.some(
+          (participant) => participant.id.toLowerCase() === normalizedUsername,
+        )
+      ),
+    );
+
+    if (existingConversation !== undefined) {
+      setSelectedConversationId(existingConversation.id);
+    } else {
+      const now = new Date().toISOString();
+      const peer: User = {
+        id: requestedContact,
+        fullName: requestedContact,
+        email: '',
+        status: 'offline',
+      };
+      const newConversation: Conversation = {
+        id: `0:${requestedContact}`,
+        type: 'direct',
+        name: requestedContact,
+        participants: [peer],
+        unreadCount: 0,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      setConversations((current) => [newConversation, ...current]);
+      setSelectedConversationId(newConversation.id);
+    }
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [conversations, isLoadingConversations, location.pathname, navigate, requestedContact]);
 
   let selectedConversation: Conversation | null = null;
   for (let i = 0; i < conversations.length; i++) {
