@@ -1,5 +1,6 @@
 import { Settings, Users } from 'lucide-react';
 import type { Conversation } from '../../types/conversation.types';
+import { useUserOnlineStatus } from '../../hooks/useUserOnlineStatus';
 
 export interface ChatHeaderProps {
   conversation?: Conversation;
@@ -7,6 +8,8 @@ export interface ChatHeaderProps {
 }
 
 const ChatHeader = ({ conversation, onOpenDetail }: ChatHeaderProps) => {
+  const isUserOnline = useUserOnlineStatus(conversation?.name);
+
   if (conversation === undefined) {
     return null;
   }
@@ -21,8 +24,7 @@ const ChatHeader = ({ conversation, onOpenDetail }: ChatHeaderProps) => {
   const avatarClassName = isRoom ? 'chat-avatar room-avatar' : 'chat-avatar';
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
-  const partner = conversation.participants[0];
-  const isPeerOnline = partner !== undefined && partner.status === 'online';
+  const isPeerOnline = !isRoom && isUserOnline;
 
   const handleOpenDetail = () => {
     if (onOpenDetail !== undefined) {

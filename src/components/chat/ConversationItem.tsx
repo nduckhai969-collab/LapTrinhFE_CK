@@ -1,5 +1,6 @@
 import { Users } from 'lucide-react';
 import type { Conversation } from '../../types/conversation.types';
+import { useUserOnlineStatus } from '../../hooks/useUserOnlineStatus';
 
 export interface ConversationItemProps {
   conversation: Conversation;
@@ -8,6 +9,7 @@ export interface ConversationItemProps {
 }
 
 const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItemProps) => {
+  const isUserOnline = useUserOnlineStatus(conversation.name);
   const itemClassName = isActive ? 'conversation-item active' : 'conversation-item';
   const isRoom = conversation.type === 'group';
 
@@ -24,8 +26,7 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
   const avatarClassName = isRoom ? 'conversation-avatar room-avatar' : 'conversation-avatar';
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
-  const partner = conversation.participants[0];
-  const isOnline = !isRoom && partner !== undefined && partner.status === 'online';
+  const isOnline = !isRoom && isUserOnline;
 
   const onClickConversation = () => {
     if (onSelect !== undefined) {

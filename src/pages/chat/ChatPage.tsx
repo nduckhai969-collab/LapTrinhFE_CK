@@ -11,6 +11,8 @@ import CreateRoomModal from '../../components/chat/CreateRoomModal';
 import ChatDetailPanel from '../../components/chat/ChatDetailPanel';
 import { mockUsers, mockCurrentUser } from '../../data/mockData';
 import { getAuthSession, getUserList } from '../../services/authSevices';
+import { ROOM_TYPE } from '../../constants/app.constants';
+import { useOnlineStatusPolling } from '../../hooks/useOnlineStatusPolling';
 import './chat.css';
 
 const ChatPage = () => {
@@ -44,7 +46,7 @@ const ChatPage = () => {
         }
 
         const serverConversations: Conversation[] = entries.map((entry) => {
-          const isGroup = entry.type === 1;
+          const isGroup = entry.type === ROOM_TYPE;
           const participant: User = {
             id: entry.name,
             fullName: entry.name,
@@ -82,48 +84,7 @@ const ChatPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (requestedContact === '' || isLoadingConversations) {
-      return;
-    }
-
-    const normalizedUsername = requestedContact.toLowerCase();
-    const existingConversation = conversations.find((conversation) =>
-      conversation.type === 'direct'
-      && (
-        conversation.name?.toLowerCase() === normalizedUsername
-        || conversation.participants.some(
-          (participant) => participant.id.toLowerCase() === normalizedUsername,
-        )
-      ),
-    );
-
-    if (existingConversation !== undefined) {
-      setSelectedConversationId(existingConversation.id);
-    } else {
-      const now = new Date().toISOString();
-      const peer: User = {
-        id: requestedContact,
-        fullName: requestedContact,
-        email: '',
-        status: 'offline',
-      };
-      const newConversation: Conversation = {
-        id: `0:${requestedContact}`,
-        type: 'direct',
-        name: requestedContact,
-        participants: [peer],
-        unreadCount: 0,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      setConversations((current) => [newConversation, ...current]);
-      setSelectedConversationId(newConversation.id);
-    }
-
-    navigate(location.pathname, { replace: true, state: null });
-  }, [conversations, isLoadingConversations, location.pathname, navigate, requestedContact]);
+  useOnlineStatusPolling(conversations);
 
   let selectedConversation: Conversation | null = null;
   for (let i = 0; i < conversations.length; i++) {

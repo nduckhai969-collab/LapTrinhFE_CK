@@ -1,14 +1,14 @@
 import {
   SET_ONLINE_ERROR,
   SET_ONLINE_LOADING,
-  SET_USER_ONLINE_STATUS,
+  SET_ONLINE_STATUS,
 } from './presenceActionTypes';
 
-export interface SetUserOnlineStatusAction {
-  type: typeof SET_USER_ONLINE_STATUS;
+export interface SetOnlineStatusAction {
+  type: typeof SET_ONLINE_STATUS;
   payload: {
-    name: string;
-    status: boolean;
+    username: string;
+    isOnline: boolean;
   };
 }
 
@@ -23,24 +23,30 @@ export interface SetOnlineErrorAction {
 }
 
 export type PresenceAction =
-  | SetUserOnlineStatusAction
+  | SetOnlineStatusAction
   | SetOnlineLoadingAction
   | SetOnlineErrorAction;
 
-export const setUserOnlineStatus = (
-  name: string,
-  status: boolean,
-): SetUserOnlineStatusAction => ({
-  type: SET_USER_ONLINE_STATUS,
-  payload: { name, status },
-});
+export function setOnlineStatus(
+  username: string,
+  isOnline: boolean,
+): SetOnlineStatusAction {
+  return {
+    type: SET_ONLINE_STATUS,
+    payload: { username, isOnline },
+  };
+}
 
-export const setOnlineLoading = (isLoading: boolean): SetOnlineLoadingAction => ({
-  type: SET_ONLINE_LOADING,
-  payload: isLoading,
-});
+export function setOnlineLoading(isLoading: boolean): SetOnlineLoadingAction {
+  return {
+    type: SET_ONLINE_LOADING,
+    payload: isLoading,
+  };
+}
 
-export const setOnlineError = (error: string | null): SetOnlineErrorAction => ({
-  type: SET_ONLINE_ERROR,
-  payload: error,
-});
+export function setOnlineError(error: string | null): SetOnlineErrorAction {
+  return {
+    type: SET_ONLINE_ERROR,
+    payload: error,
+  };
+}
