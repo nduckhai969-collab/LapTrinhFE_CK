@@ -1,46 +1,51 @@
 import {
   SET_ONLINE_ERROR,
   SET_ONLINE_LOADING,
-  SET_USER_ONLINE_STATUS,
+  SET_ONLINE_STATUS,
 } from './presenceActionTypes';
 import type { PresenceAction } from './presenceActions';
 
 export interface PresenceState {
-  onlineByName: Record<string, boolean>;
+  onlineStatusByUsername: Record<string, boolean>;
   isLoading: boolean;
   error: string | null;
 }
 
 export const initialPresenceState: PresenceState = {
-  onlineByName: {},
+  onlineStatusByUsername: {},
   isLoading: false,
   error: null,
 };
 
-export const presenceReducer = (
+export function presenceReducer(
   state: PresenceState = initialPresenceState,
   action: PresenceAction,
-): PresenceState => {
+): PresenceState {
   switch (action.type) {
-    case SET_USER_ONLINE_STATUS:
+    case SET_ONLINE_STATUS: {
+      const nextOnlineStatusByUsername = {
+        ...state.onlineStatusByUsername,
+        [action.payload.username]: action.payload.isOnline,
+      };
       return {
         ...state,
-        onlineByName: {
-          ...state.onlineByName,
-          [action.payload.name]: action.payload.status,
-        },
+        onlineStatusByUsername: nextOnlineStatusByUsername,
       };
+    }
+
     case SET_ONLINE_LOADING:
       return {
         ...state,
         isLoading: action.payload,
       };
+
     case SET_ONLINE_ERROR:
       return {
         ...state,
         error: action.payload,
       };
+
     default:
       return state;
   }
-};
+}

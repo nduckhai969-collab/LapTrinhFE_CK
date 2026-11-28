@@ -1,4 +1,4 @@
-import { ACTION, SOCKET_EVENTS } from '../constants/socket.constants';
+import { ACTION } from '../constants/socket.constants';
 import type { SocketEvent } from '../constants/socket.constants';
 import type { SocketEnvelope, SocketResponse } from '../types/socket.types';
 
@@ -6,7 +6,6 @@ const SOCKET_URL = import.meta.env.VITE_WS_URL;
 const REQUEST_TIMEOUT_MS = 15000;
 
 interface PendingRequest {
-  promise: Promise<unknown>;
   resolve: (value: unknown) => void;
   reject: (reason: Error) => void;
   timeoutId: number;
@@ -14,9 +13,23 @@ interface PendingRequest {
 
 let socket: WebSocket | null = null;
 let connectionPromise: Promise<void> | null = null;
-const pendingRequests = new Map<string, PendingRequest>();
+const pendingRequests = new Map<SocketEvent, PendingRequest[]>();
 const messageListeners = new Set<(response: SocketResponse) => void>();
 const closeListeners = new Set<() => void>();
+
+const removePendingRequest = (event: SocketEvent, request: PendingRequest): void => {
+  const queue = pendingRequests.get(event);
+  if (queue === undefined) {
+    return;
+  }
+  const index = queue.indexOf(request);
+  if (index !== -1) {
+    queue.splice(index, 1);
+  }
+  if (queue.length === 0) {
+    pendingRequests.delete(event);
+  }
+};
 
 export const connectSocket = async (): Promise<void> => {
   if (socket?.readyState === WebSocket.OPEN) {
@@ -36,9 +49,11 @@ export const connectSocket = async (): Promise<void> => {
       if (isActiveSocket) {
         socket = null;
       }
-      pendingRequests.forEach((request) => {
-        window.clearTimeout(request.timeoutId);
-        request.reject(new Error('Kết nối tới máy chủ chat đã bị đóng.'));
+      pendingRequests.forEach((queue) => {
+        queue.forEach((request) => {
+          window.clearTimeout(request.timeoutId);
+          request.reject(new Error('Kết nối tới máy chủ chat đã bị đóng.'));
+        });
       });
       pendingRequests.clear();
       if (isActiveSocket) {
@@ -55,12 +70,15 @@ export const connectSocket = async (): Promise<void> => {
 
       messageListeners.forEach((listener) => listener(response));
 
-      const request = pendingRequests.get(response.event);
+      const queue = pendingRequests.get(response.event);
+      const request = queue?.shift();
+      if (queue !== undefined && queue.length === 0) {
+        pendingRequests.delete(response.event);
+      }
       if (request === undefined) {
         return;
       }
       window.clearTimeout(request.timeoutId);
-      pendingRequests.delete(response.event);
       if (response.status === 'success') {
         request.resolve(response.data);
       } else {
@@ -87,13 +105,6 @@ export const sendSocket = async <T>(
   if (socket === null || socket.readyState !== WebSocket.OPEN) {
     throw new Error('Kết nối tới máy chủ chat chưa sẵn sàng.');
   }
-  const existingRequest = pendingRequests.get(event);
-  if (existingRequest !== undefined) {
-    if (event === SOCKET_EVENTS.GET_USER_LIST || event === SOCKET_EVENTS.RE_LOGIN) {
-      return existingRequest.promise as Promise<T>;
-    }
-    throw new Error(`Yêu cầu ${event} đang được xử lý.`);
-  }
 
   const payload: SocketEnvelope = data === undefined
     ? { action: ACTION, data: { event } }
@@ -105,25 +116,29 @@ export const sendSocket = async <T>(
     resolveRequest = resolve;
     rejectRequest = reject;
   });
-  const timeoutId = window.setTimeout(() => {
-    if (pendingRequests.get(event)?.promise === requestPromise) {
-      pendingRequests.delete(event);
-    }
+
+  const pending: PendingRequest = {
+    resolve: (value) => resolveRequest(value as T),
+    reject: rejectRequest,
+    timeoutId: 0,
+  };
+  pending.timeoutId = window.setTimeout(() => {
+    removePendingRequest(event, pending);
     rejectRequest(new Error(`Máy chủ không phản hồi yêu cầu ${event}.`));
   }, REQUEST_TIMEOUT_MS);
 
-  pendingRequests.set(event, {
-    promise: requestPromise,
-    resolve: (value) => resolveRequest(value as T),
-    reject: rejectRequest,
-    timeoutId,
-  });
+  const queue = pendingRequests.get(event);
+  if (queue === undefined) {
+    pendingRequests.set(event, [pending]);
+  } else {
+    queue.push(pending);
+  }
 
   try {
     socket.send(JSON.stringify(payload));
   } catch {
-    window.clearTimeout(timeoutId);
-    pendingRequests.delete(event);
+    window.clearTimeout(pending.timeoutId);
+    removePendingRequest(event, pending);
     rejectRequest(new Error('Không gửi được yêu cầu tới máy chủ chat.'));
   }
 

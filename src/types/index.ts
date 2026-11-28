@@ -6,4 +6,4 @@ export * from './contact.types';
 export * from './notification.types';
 export * from './api.types';
 export * from './socket.types';
-
+export * from './presence.types';
