@@ -571,6 +571,29 @@
   color: #dc2626;
 }
 
+.detail-delete-confirm {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-delete-confirm-text {
+  font-size: 14px;
+  color: #dc2626;
+}
+
+.detail-delete-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-delete-confirm-actions .modal-button-danger {
+  margin-right: 0;
+}
+
 .detail-summary {
   display: flex;
   align-items: center;
