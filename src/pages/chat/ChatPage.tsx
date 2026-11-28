@@ -106,6 +106,18 @@ const ChatPage = () => {
       (conversation) => (conversation.name ?? '').toLowerCase().includes(keyword),
     );
 
+  const handleSelectConversation = (id: string) => {
+    setSelectedConversationId(id);
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (conversation.id === id && conversation.unreadCount > 0) {
+          return { ...conversation, unreadCount: 0 };
+        }
+        return conversation;
+      }),
+    );
+  };
+
   const handleSendMessage = (content: string) => {
     if (selectedConversationId === null) {
       return;
@@ -201,7 +213,7 @@ const ChatPage = () => {
             conversations={filteredConversations}
             activeId={activeConversationId}
             emptyMessage={keyword === '' ? undefined : 'Không tìm thấy cuộc trò chuyện phù hợp.'}
-            onSelectConversation={setSelectedConversationId}
+            onSelectConversation={handleSelectConversation}
           />
         )}
       </aside>
