@@ -13,7 +13,7 @@ interface PendingRequest {
 
 let socket: WebSocket | null = null;
 let connectionPromise: Promise<void> | null = null;
-const pendingRequests = new Map<SocketEvent, PendingRequest[]>();
+const pendingRequests = new Map<string, PendingRequest[]>();
 const messageListeners = new Set<(response: SocketResponse) => void>();
 const closeListeners = new Set<() => void>();
 

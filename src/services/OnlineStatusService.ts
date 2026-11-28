@@ -29,7 +29,7 @@ class OnlineStatusService {
     try {
       await request;
     } catch {
-
+      // Bỏ qua lỗi để không chặn luồng kiểm tra trạng thái kế tiếp.
     }
   }
 }
