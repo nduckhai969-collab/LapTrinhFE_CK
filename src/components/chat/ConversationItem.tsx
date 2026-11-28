@@ -27,6 +27,8 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
   const avatarText = isRoom ? '#' : displayName.charAt(0);
   const memberCount = conversation.participants.length;
   const isOnline = !isRoom && isUserOnline;
+  const unreadCount = conversation.unreadCount;
+  const unreadText = unreadCount > 99 ? '99+' : String(unreadCount);
 
   const onClickConversation = () => {
     if (onSelect !== undefined) {
@@ -59,6 +61,11 @@ const ConversationItem = ({ conversation, isActive, onSelect }: ConversationItem
         </div>
         <span className="conversation-last-message">{lastMessageText}</span>
       </div>
+      {unreadCount > 0 && (
+        <span className="conversation-unread" aria-label={`${unreadCount} tin nhắn chưa đọc`}>
+          {unreadText}
+        </span>
+      )}
     </div>
   );
 };

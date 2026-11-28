@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import type { Conversation, CreateConversationPayload, Message, User } from '../../types';
 import SearchInput from '../../components/common/SearchInput';
@@ -16,10 +15,6 @@ import { useOnlineStatusPolling } from '../../hooks/useOnlineStatusPolling';
 import './chat.css';
 
 const ChatPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const navigationState = location.state as { openContact?: string } | null;
-  const requestedContact = navigationState?.openContact?.trim() ?? '';
   const session = getAuthSession();
   const currentUserId = session?.username ?? mockCurrentUser.id;
   const senderNames: Record<string, string> = {
@@ -35,6 +30,7 @@ const ChatPage = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [conversationError, setConversationError] = useState('');
+  const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
     let isCurrent = true;
@@ -102,6 +98,25 @@ const ChatPage = () => {
   const conversationMessages = messages.filter(
     (message) => message.conversationId === selectedConversationId,
   );
+
+  const keyword = searchValue.trim().toLowerCase();
+  const filteredConversations = keyword === ''
+    ? conversations
+    : conversations.filter(
+      (conversation) => (conversation.name ?? '').toLowerCase().includes(keyword),
+    );
+
+  const handleSelectConversation = (id: string) => {
+    setSelectedConversationId(id);
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (conversation.id === id && conversation.unreadCount > 0) {
+          return { ...conversation, unreadCount: 0 };
+        }
+        return conversation;
+      }),
+    );
+  };
 
   const handleSendMessage = (content: string) => {
     if (selectedConversationId === null) {
@@ -175,7 +190,12 @@ const ChatPage = () => {
     <div className="chat-page">
       <aside className="conversation-panel">
         <div className="conversation-toolbar">
-          <SearchInput className="conversation-search" placeholder="Tìm kiếm cuộc trò chuyện" />
+          <SearchInput
+            className="conversation-search"
+            placeholder="Tìm kiếm cuộc trò chuyện"
+            value={searchValue}
+            onChange={setSearchValue}
+          />
           <button
             type="button"
             className="create-room-button"
@@ -190,9 +210,10 @@ const ChatPage = () => {
           <div className="conversation-empty">Đang tải hội thoại...</div>
         ) : (
           <ConversationList
-            conversations={conversations}
+            conversations={filteredConversations}
             activeId={activeConversationId}
-            onSelectConversation={setSelectedConversationId}
+            emptyMessage={keyword === '' ? undefined : 'Không tìm thấy cuộc trò chuyện phù hợp.'}
+            onSelectConversation={handleSelectConversation}
           />
         )}
       </aside>

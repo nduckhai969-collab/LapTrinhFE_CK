@@ -182,6 +182,22 @@
   text-overflow: ellipsis;
 }
 
+.conversation-unread {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: blueviolet;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .chat-area {
   flex: 1;
   min-width: 0;
@@ -569,6 +585,29 @@
   margin-right: auto;
   background-color: #fee2e2;
   color: #dc2626;
+}
+
+.detail-delete-confirm {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-delete-confirm-text {
+  font-size: 14px;
+  color: #dc2626;
+}
+
+.detail-delete-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-delete-confirm-actions .modal-button-danger {
+  margin-right: 0;
 }
 
 .detail-summary {

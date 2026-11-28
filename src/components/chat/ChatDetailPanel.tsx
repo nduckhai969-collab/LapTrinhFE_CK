@@ -20,6 +20,7 @@ const ChatDetailPanel = ({
   const [nameValue, setNameValue] = useState(
     conversation === undefined ? '' : conversation.name ?? '',
   );
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   if (isOpen !== true || conversation === undefined) {
     return null;
@@ -38,6 +39,7 @@ const ChatDetailPanel = ({
 
   const handleClose = () => {
     setNameValue(conversation.name ?? '');
+    setIsConfirmingDelete(false);
     if (onClose !== undefined) {
       onClose();
     }
@@ -51,10 +53,19 @@ const ChatDetailPanel = ({
     onRename(conversation.id, trimmedName);
   };
 
-  const handleDelete = () => {
+  const handleAskDelete = () => {
+    setIsConfirmingDelete(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmingDelete(false);
+  };
+
+  const handleConfirmDelete = () => {
     if (onDelete !== undefined) {
       onDelete(conversation.id);
     }
+    setIsConfirmingDelete(false);
   };
 
   return (
@@ -123,13 +134,48 @@ const ChatDetailPanel = ({
         </div>
 
         <div className="modal-footer">
-          <button type="button" className="modal-button modal-button-danger" onClick={handleDelete}>
-            <Trash2 size={16} />
-            Xóa đoạn chat
-          </button>
-          <button type="button" className="modal-button modal-button-secondary" onClick={handleClose}>
-            Đóng
-          </button>
+          {isConfirmingDelete ? (
+            <div className="detail-delete-confirm">
+              <span className="detail-delete-confirm-text">
+                Xóa đoạn chat này? Hành động không thể hoàn tác.
+              </span>
+              <div className="detail-delete-confirm-actions">
+                <button
+                  type="button"
+                  className="modal-button modal-button-danger"
+                  onClick={handleConfirmDelete}
+                >
+                  <Trash2 size={16} />
+                  Xóa
+                </button>
+                <button
+                  type="button"
+                  className="modal-button modal-button-secondary"
+                  onClick={handleCancelDelete}
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="modal-button modal-button-danger"
+                onClick={handleAskDelete}
+              >
+                <Trash2 size={16} />
+                Xóa đoạn chat
+              </button>
+              <button
+                type="button"
+                className="modal-button modal-button-secondary"
+                onClick={handleClose}
+              >
+                Đóng
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
