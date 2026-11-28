@@ -5,6 +5,7 @@ export interface ContactListProps {
   contacts?: Contact[];
   onlineByUsername?: Record<string, boolean | null>;
   emptyMessage?: string;
+  onOpenContact?: (username: string) => void;
   onRemoveContact?: (id: string) => void;
 }
 
@@ -12,6 +13,7 @@ const ContactList = ({
   contacts = [],
   onlineByUsername = {},
   emptyMessage = 'Thêm một tài khoản bằng tên đăng nhập để bắt đầu.',
+  onOpenContact,
   onRemoveContact,
 }: ContactListProps) => {
   if (contacts.length === 0) {
@@ -31,6 +33,7 @@ const ContactList = ({
           key={contact.id}
           contact={contact}
           isOnline={onlineByUsername[contact.contactUserId.toLowerCase()]}
+          onOpenChat={onOpenContact}
           onRemove={onRemoveContact}
         />
       ))}
